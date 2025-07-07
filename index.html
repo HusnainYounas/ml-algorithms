@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning Algorithm's by Husnain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Serene & Trustworthy -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive dashboard with three main views controlled by a primary navigation: "Algorithm Explorer," "Head-to-Head Comparison," and "Performance Ranking." The Explorer allows filtering by algorithm category, displaying each as a clickable card for detailed analysis. A search bar further refines the algorithm list. The Comparison view uses dropdowns to select two algorithms, presenting their strengths and weaknesses side-by-side, complemented by a radar chart for a quick visual summary of key attributes. The Ranking view uses a horizontal bar chart to visualize the report's final conclusions. This task-oriented, dashboard structure was chosen over a linear report format to empower users to actively explore and compare information based on their specific questions, enhancing understanding and usability for a professional audience. -->
+    <!-- Visualization & Content Choices: Algorithm List (Report Info) -> Goal: Organize/Navigate -> Viz: Filterable grid of cards (HTML/CSS) with search bar -> Interaction: Click filters/type search query to see specific algorithm types. Justification: More dynamic than a static table, search improves discoverability. Algorithm Details (Report Info) -> Goal: Inform/Compare -> Viz: Side-by-side text display and a radar chart (Chart.js/Canvas) -> Interaction: Select algorithms from dropdowns. Justification: Direct comparison is easier, and the radar chart provides a quick visual summary of abstract trade-offs. Performance Ranking (Report Info) -> Goal: Compare/Inform -> Viz: Horizontal bar chart (Chart.js/Canvas) -> Interaction: Hover for details. Justification: More visually impactful than a text list. Scikit-learn cheat sheet link (Reference) -> Goal: Inform/Reference -> Viz: Hyperlink (HTML <a>) -> Interaction: Click to open in new tab. Justification: Provides a direct link to the official, interactive, and most up-to-date resource. ML Libraries (New Section) -> Goal: Provide resources -> Viz: List of hyperlinks -> Interaction: Click to open documentation. Justification: Centralized resource list for common ML libraries. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D405B;
+        }
+        .nav-active {
+            background-color: #81B29A;
+            color: #FFFFFF;
+        }
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        .filter-active {
+            background-color: #E07A5F;
+            color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .modal-content {
+            background-color: #F8F7F4;
+            margin: 5% auto;
+            padding: 2rem;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 0.5rem;
+            animation: slideIn 0.3s ease-in-out;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); }
+            to { transform: translateY(0); }
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #81B29A;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6a947e;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#3D405B] mb-2">Machine Learning Algorithm's by Husnain</h1>
+            <p class="text-lg text-gray-600">An interactive guide to traditional machine learning algorithms based on the comprehensive analysis report.</p>
+        </header>
+
+        <nav class="flex justify-center mb-8 bg-white p-2 rounded-full shadow-md">
+            <button data-view="explorer" class="nav-item nav-active px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold">Search</button>
+            <button data-view="comparison" class="nav-item px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold">Head-to-Head Comparison</button>
+            <button data-view="ranking" class="nav-item px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold">Performance Ranking</button>
+            <button data-view="reference" class="nav-item px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold">Scikit-learn Reference</button>
+            <button data-view="libraries" class="nav-item px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold">ML Libraries</button>
+        </nav>
+
+        <main>
+            <!-- Algorithm Explorer View -->
+            <div id="explorer-view">
+                <div class="text-center mb-8">
+                    <p class="max-w-3xl mx-auto text-gray-700">This section provides a detailed breakdown of each machine learning algorithm. Use the filters to narrow down by category. You can also search for a specific algorithm by name or summary. Click on any algorithm card to view its detailed analysis, including its primary applications, strengths, and weaknesses.</p>
+                </div>
+                <div class="mb-6">
+                    <input type="text" id="search-input" placeholder="Search algorithms..." class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-[#81B29A] focus:border-transparent">
+                </div>
+                <div id="filters" class="flex flex-wrap justify-center gap-2 mb-8">
+                    <button data-filter="all" class="filter-btn filter-active px-4 py-2 bg-white rounded-full shadow-sm font-medium">All</button>
+                    <button data-filter="Supervised Learning" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Supervised</button>
+                    <button data-filter="Unsupervised Learning" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Unsupervised</button>
+                    <button data-filter="Dimensionality Reduction" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Dimensionality Reduction</button>
+                    <button data-filter="Semi-Supervised Learning" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Semi-Supervised</button>
+                    <button data-filter="Tree-Based Algorithms" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Tree-Based</button>
+                    <button data-filter="Boosting Algorithms" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Boosting</button>
+                    <button data-filter="Reinforcement Learning" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Reinforcement Learning</button>
+                </div>
+                <div id="algorithm-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Algorithm cards will be injected here -->
+                </div>
+            </div>
+
+            <!-- Comparison View -->
+            <div id="comparison-view" class="hidden">
+                 <div class="text-center mb-8">
+                    <p class="max-w-3xl mx-auto text-gray-700">Directly compare two algorithms to understand their relative advantages. Select an algorithm from each dropdown to see a side-by-side analysis of their strengths and weaknesses, along with a radar chart visualizing their key characteristics like performance, speed, and interpretability.</p>
+                </div>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+                    <select id="algo1-select" class="p-3 border rounded-lg shadow-sm bg-white w-full md:w-1/3"></select>
+                    <span class="font-bold text-2xl text-[#E07A5F]">vs</span>
+                    <select id="algo2-select" class="p-3 border rounded-lg shadow-sm bg-white w-full md:w-1/3"></select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div id="algo1-details" class="bg-white p-6 rounded-lg shadow-lg"></div>
+                    <div id="algo2-details" class="bg-white p-6 rounded-lg shadow-lg"></div>
+                </div>
+                <div class="mt-8 bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#3D405B]">Attribute Comparison</h3>
+                    <div class="chart-container h-96 md:h-[500px]">
+                        <canvas id="comparison-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranking View -->
+            <div id="ranking-view" class="hidden">
+                 <div class="text-center mb-8">
+                    <p class="max-w-3xl mx-auto text-gray-700">This section visualizes the final rankings from the report, which are based on a synthesis of general performance, versatility, and real-world applicability. The ranking provides a high-level guide to help practitioners choose the most suitable algorithm for their specific needs, with top-tier algorithms offering the best balance of accuracy and robustness for structured data problems.</p>
+                    <p class="max-w-3xl mx-auto text-gray-700 mt-4">Note: Reinforcement Learning algorithms are ranked separately due to their distinct problem domain (sequential decision-making) compared to traditional supervised/unsupervised tasks.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#3D405B]">Algorithm Performance & Application Ranking</h3>
+                    <div class="chart-container h-[800px] md:h-[1000px]">
+                        <canvas id="ranking-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scikit-learn Reference View -->
+            <div id="reference-view" class="hidden">
+                <div class="text-center mb-8">
+                    <p class="max-w-3xl mx-auto text-gray-700">This section provides a direct link to the official scikit-learn algorithm cheat sheet, which can help guide algorithm selection based on your problem type and data characteristics.</p>
+                </div>
+                <div class="flex justify-center items-center p-4 bg-white rounded-lg shadow-lg">
+                    <a href="https://scikit-learn.org/1.3/tutorial/machine_learning_map/" target="_blank" class="text-[#81B29A] hover:underline text-lg font-semibold">Go to Scikit-learn Algorithm Map</a>
+                </div>
+            </div>
+
+            <!-- ML Libraries View -->
+            <div id="libraries-view" class="hidden">
+                <div class="text-center mb-8">
+                    <p class="max-w-3xl mx-auto text-gray-700">Explore essential machine learning libraries, each offering robust tools for various tasks. Click on a link to visit their official documentation.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#3D405B]">Popular ML Libraries</h3>
+                    <ul class="list-disc list-inside space-y-3 text-gray-700 max-w-2xl mx-auto">
+                        <li>
+                            <a href="https://scikit-learn.org/stable/documentation.html" target="_blank" class="text-[#81B29A] hover:underline font-medium">Scikit-learn</a>: Comprehensive library for traditional machine learning algorithms (classification, regression, clustering, dimensionality reduction, model selection, preprocessing).
+                        </li>
+                        <li>
+                            <a href="https://www.statsmodels.org/stable/index.html" target="_blank" class="text-[#81B29A] hover:underline font-medium">Statsmodels</a>: Provides classes and functions for the estimation of many different statistical models, as well as for conducting statistical tests and statistical data exploration.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="algorithm-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        const appData = {
+            algorithms: [
+                {
+                    id: 'linear-regression',
+                    name: 'Linear Regression',
+                    category: 'Supervised Learning',
+                    summary: 'Establishes a linear relationship between input predictors and a continuous output variable.',
+                    applications: 'Predicting sales numbers, housing prices, or car prices.',
+                    strengths: ['High interpretability and simplicity.', 'Computationally efficient.', 'Serves as a fundamental building block for other models.'],
+                    weaknesses: ['Assumes a linear relationship, which can be an oversimplification.', 'Sensitive to outliers.', 'Prone to overfitting with many features.', 'Relies on strict statistical assumptions (normality, homoscedasticity, independence).'],
+                    attributes: { performance: 3, speed: 8, interpretability: 10, scalability: 7, robustness: 3 }
+                },
+                {
+                    id: 'ridge-regression',
+                    name: 'Ridge Regression',
+                    category: 'Supervised Learning',
+                    summary: 'A regularized version of Linear Regression that adds an L2 penalty to the loss function to prevent overfitting and handle multicollinearity.',
+                    applications: 'When multicollinearity is present, high-dimensional data, preventing overfitting in linear models.',
+                    strengths: ['Reduces overfitting by shrinking coefficients.', 'Handles multicollinearity effectively.', 'Improves generalization on unseen data.', 'Provides more stable coefficient estimates.'],
+                    weaknesses: ['Still assumes a linear relationship between features and target.', 'Requires careful tuning of the regularization parameter (alpha).', 'Interpretability is slightly reduced compared to plain Linear Regression (coefficients are shrunk).', 'Does not perform feature selection (coefficients are shrunk towards zero but not to zero).'],
+                    attributes: { performance: 4, speed: 8, interpretability: 9, scalability: 7, robustness: 6 }
+                },
+                {
+                    id: 'lasso-regression',
+                    name: 'Lasso Regression',
+                    category: 'Supervised Learning',
+                    summary: 'A regularized version of Linear Regression that adds an L1 penalty, promoting sparsity and automatic feature selection.',
+                    applications: 'Feature selection, high-dimensional data where many features are irrelevant, preventing overfitting.',
+                    strengths: ['Performs automatic feature selection by shrinking some coefficients to zero.', 'Handles multicollinearity effectively.', 'Improves model interpretability by identifying important features.', 'Reduces overfitting and improves generalization.'],
+                    weaknesses: ['Can be unstable when highly correlated features exist (tends to pick one and ignore others).', 'Requires careful tuning of the regularization parameter (alpha).', 'Still assumes a linear relationship.', 'May not perform as well as Elastic Net when many features are truly correlated.'],
+                    attributes: { performance: 5, speed: 7, interpretability: 8, scalability: 7, robustness: 6 }
+                },
+                {
+                    id: 'elastic-net-regression',
+                    name: 'Elastic Net Regression',
+                    category: 'Supervised Learning',
+                    summary: 'A regularized linear regression method that combines L1 (Lasso) and L2 (Ridge) penalties to balance feature selection and coefficient shrinkage.',
+                    applications: 'High-dimensional data with many correlated features, when both feature selection and regularization are desired.',
+                    strengths: ['Combines benefits of Lasso (feature selection) and Ridge (handling multicollinearity).', 'Robust to highly correlated features (unlike Lasso, it can select groups of correlated features).', 'Reduces overfitting and improves generalization.', 'More stable than Lasso when many features are correlated.'],
+                    weaknesses: ['Requires tuning of two regularization parameters (L1 ratio and alpha).', 'More complex to interpret than plain Linear or Ridge Regression.', 'Computationally more expensive than Lasso or Ridge for very large datasets.', 'Still assumes a linear relationship.'],
+                    attributes: { performance: 6, speed: 6, interpretability: 7, scalability: 6, robustness: 7 }
+                },
+                {
+                    id: 'logistic-regression',
+                    name: 'Logistic Regression',
+                    category: 'Supervised Learning',
+                    summary: 'Predicts the probability that an input belongs to a specific category, primarily for binary classification.',
+                    applications: 'Spam email detection, medical diagnosis, fraud detection, churn prediction.',
+                    strengths: ['Produces probabilistic outputs.', 'Coefficients are highly interpretable.', 'Computationally efficient and easy to implement.'],
+                    weaknesses: ['Assumes a linear relationship between features and the log-odds of the outcome.', 'Decision boundary is linear, struggling with non-linear problems.', 'Sensitive to influential outliers.', 'Requires larger datasets to work effectively.'],
+                    attributes: { performance: 5, speed: 8, interpretability: 9, scalability: 7, robustness: 4 }
+                },
+                {
+                    id: 'sgd-classifier',
+                    name: 'SGD Classifier',
+                    category: 'Supervised Learning',
+                    summary: 'Implements stochastic gradient descent for linear classification, supporting various loss functions and regularization.',
+                    applications: 'Large-scale text classification, online learning, sparse data, when data is too large for in-memory processing.',
+                    strengths: ['Very efficient for large, sparse datasets.', 'Supports online learning (can update model incrementally).', 'Flexible with various loss functions (e.g., hinge, log, modified Huber) and regularization (L1, L2, Elastic Net).', 'Scalable to millions of samples.'],
+                    weaknesses: ['Requires careful feature scaling (e.g., standardization).', 'Sensitive to hyperparameters (learning rate, regularization strength).', 'Can be sensitive to the order of training data (shuffling is important).', 'May converge to a local minimum instead of global optimum.'],
+                    attributes: { performance: 6, speed: 9, interpretability: 7, scalability: 9, robustness: 5 }
+                },
+                {
+                    id: 'sgd-regressor',
+                    name: 'SGD Regressor',
+                    category: 'Supervised Learning',
+                    summary: 'Implements stochastic gradient descent for linear regression, supporting various loss functions and regularization.',
+                    applications: 'Large-scale regression problems, online learning, when data is too large for in-memory processing.',
+                    strengths: ['Very efficient for large datasets.', 'Supports online learning (can update model incrementally).', 'Flexible with various loss functions (e.g., squared_error, Huber) and regularization (L1, L2, Elastic Net).', 'Scalable to millions of samples.'],
+                    weaknesses: ['Requires careful feature scaling (e.g., standardization).', 'Sensitive to hyperparameters (learning rate, regularization strength).', 'Can be sensitive to the order of training data (shuffling is important).', 'May converge to a local minimum instead of global optimum.'],
+                    attributes: { performance: 6, speed: 9, interpretability: 7, scalability: 9, robustness: 5 }
+                },
+                {
+                    id: 'naive-bayes',
+                    name: 'Naive Bayes',
+                    category: 'Supervised Learning',
+                    summary: 'A fast, scalable classifier based on Bayes\' theorem with a strong independence assumption.',
+                    applications: 'Text classification, spam filtering, sentiment analysis, real-time prediction.',
+                    strengths: ['Extremely fast and simple to implement.', 'Highly scalable with predictors and data points.', 'Requires less training data than other algorithms.', 'Not sensitive to irrelevant features.'],
+                    weaknesses: ['The "naive" assumption of feature independence rarely holds true.', 'Can lead to inaccurate probability estimates.', 'Suffers from the "zero-frequency problem" (mitigated by smoothing).'],
+                    attributes: { performance: 6, speed: 10, interpretability: 8, scalability: 9, robustness: 5 }
+                },
+                {
+                    id: 'svc',
+                    name: 'Support Vector Classifier (SVC)',
+                    category: 'Supervised Learning',
+                    summary: 'A Support Vector Machine (SVM) specifically for classification, finding an optimal hyperplane to separate classes.',
+                    applications: 'Image classification, text classification, bioinformatics, fraud detection.',
+                    strengths: ['High accuracy, especially in high-dimensional spaces.', 'Robust against overfitting when dimensions > samples.', 'The "kernel trick" allows it to solve non-linear problems.', 'Guaranteed to find a global optimum.'],
+                    weaknesses: ['Computationally expensive and memory-intensive for large datasets.', 'Performance is highly sensitive to hyperparameter tuning (C, kernel).', 'Does not directly provide probability estimates.', 'Often a "black box" model, lacking interpretability.'],
+                    attributes: { performance: 8, speed: 4, interpretability: 3, scalability: 3, robustness: 7 }
+                },
+                {
+                    id: 'svr',
+                    name: 'Support Vector Regressor (SVR)',
+                    category: 'Supervised Learning',
+                    summary: 'A Support Vector Machine (SVM) specifically for regression, finding a function that deviates from the true values by a margin (epsilon).',
+                    applications: 'Time series forecasting, financial prediction, non-linear regression tasks, when robustness to outliers is important.',
+                    strengths: ['Effective in high-dimensional spaces.', 'Robust to outliers due to epsilon-insensitive loss function (ignores errors within a certain margin).', 'Can model non-linear relationships using kernel functions (e.g., RBF, polynomial).', 'Guaranteed to find a global optimum.'],
+                    weaknesses: ['Computationally expensive and memory-intensive for large datasets.', 'Performance is highly sensitive to hyperparameter tuning (C, epsilon, kernel parameters).', 'Does not directly provide confidence intervals for predictions.', 'Less interpretable than linear regression models.'],
+                    attributes: { performance: 8, speed: 4, interpretability: 3, scalability: 3, robustness: 7 }
+                },
+                {
+                    id: 'knn',
+                    name: 'K-Nearest Neighbors (KNN)',
+                    category: 'Supervised Learning',
+                    summary: 'A simple, non-parametric algorithm that classifies data points based on their neighbors.',
+                    applications: 'Simple recommendation systems, pattern recognition, data mining.',
+                    strengths: ['Simple to understand and implement.', 'No training phase ("lazy learner").', 'Adapts easily to new data.', 'Flexible with distance metrics.'],
+                    weaknesses: ['Computationally expensive at prediction time.', 'High memory usage as it stores the entire dataset.', 'Highly sensitive to the "curse of dimensionality".', 'Sensitive to feature scaling, noise, and outliers.'],
+                    attributes: { performance: 4, speed: 3, interpretability: 7, scalability: 2, robustness: 3 }
+                },
+                {
+                    id: 'mlp-classifier',
+                    name: 'Multi-layer Perceptron (MLP) Classifier',
+                    category: 'Supervised Learning',
+                    summary: 'A feedforward artificial neural network that learns non-linear functions for classification tasks.',
+                    applications: 'Image recognition, natural language processing (for simpler tasks), speech recognition, predictive analytics.',
+                    strengths: ['Capable of learning non-linear models and complex relationships.', 'Can learn models for real-time prediction.', 'Offers flexibility in network architecture (number of layers, neurons).', 'Can be used for both binary and multi-class classification.'],
+                    weaknesses: ['Requires careful tuning of hyperparameters (learning rate, hidden layer sizes, activation functions, regularization).', 'Sensitive to feature scaling.', 'Prone to local minima during training (optimization is non-convex).', 'Computationally expensive for large networks or datasets.', 'Black-box nature, difficult to interpret.'],
+                    attributes: { performance: 8, speed: 5, interpretability: 2, scalability: 4, robustness: 5 }
+                },
+                {
+                    id: 'mlp-regressor',
+                    name: 'Multi-layer Perceptron (MLP) Regressor',
+                    category: 'Supervised Learning',
+                    summary: 'A feedforward artificial neural network that learns non-linear functions for regression tasks.',
+                    applications: 'Time series forecasting, financial modeling, predicting continuous values in complex systems.',
+                    strengths: ['Capable of learning non-linear models and complex relationships.', 'Can learn models for real-time prediction.', 'Offers flexibility in network architecture (number of layers, neurons).', 'Can approximate any continuous function.'],
+                    weaknesses: ['Requires careful tuning of hyperparameters (learning rate, hidden layer sizes, activation functions, regularization).', 'Sensitive to feature scaling.', 'Prone to local minima during training (optimization is non-convex).', 'Computationally expensive for large networks or datasets.', 'Black-box nature, difficult to interpret.'],
+                    attributes: { performance: 8, speed: 5, interpretability: 2, scalability: 4, robustness: 5 }
+                },
+                {
+                    id: 'qda',
+                    name: 'Quadratic Discriminant Analysis (QDA)',
+                    category: 'Supervised Learning',
+                    summary: 'A classifier that assumes each class has its own covariance matrix, leading to quadratic decision boundaries.',
+                    applications: 'Classification tasks where classes are separated by non-linear boundaries, especially when class-specific variances differ.',
+                    strengths: ['Can model non-linear decision boundaries.', 'More flexible than LDA when class covariance matrices are unequal.', 'Relatively fast and simple for moderate datasets.', 'Can perform well when assumptions are met.'],
+                    weaknesses: ['Assumes Gaussian distribution for each class.', 'Requires more data than LDA to estimate class-specific covariance matrices reliably.', 'Sensitive to outliers.', 'Can overfit if the number of features is large relative to samples (due to estimating more parameters).'],
+                    attributes: { performance: 6, speed: 7, interpretability: 6, scalability: 5, robustness: 4 }
+                },
+                {
+                    id: 'k-means',
+                    name: 'K-Means Clustering',
+                    category: 'Unsupervised Learning',
+                    summary: 'An iterative algorithm that partitions a dataset into K pre-defined, distinct, non-overlapping subgroups (clusters).',
+                    applications: 'Customer segmentation, document clustering, image segmentation.',
+                    strengths: ['Efficient and scalable with linear time complexity.', 'Simple to implement and interpret results.', 'Guaranteed to converge.'],
+                    weaknesses: ['Must specify the number of clusters (K) in advance.', 'Highly sensitive to initial centroid placement and outliers.', 'Assumes clusters are spherical and of similar size.', 'Can get stuck in local optima.'],
+                    attributes: { performance: 5, speed: 9, interpretability: 8, scalability: 9, robustness: 4 }
+                },
+                {
+                    id: 'mini-batch-kmeans',
+                    name: 'Mini-Batch K-Means',
+                    category: 'Unsupervised Learning',
+                    summary: 'A variant of K-Means that uses mini-batches of data to update cluster centroids, making it faster and more scalable for large datasets.',
+                    applications: 'Large-scale customer segmentation, big data clustering, real-time clustering.',
+                    strengths: ['Significantly faster than standard K-Means for large datasets.', 'Reduces memory footprint by processing data in mini-batches.', 'Can handle datasets that do not fit into memory.', 'Still relatively simple to implement and interpret.'],
+                    weaknesses: ['Results can be slightly less stable than full K-Means (due to mini-batch randomness).', 'Still requires specifying the number of clusters (K) in advance.', 'Sensitive to outliers and initial centroid placement.', 'Assumes spherical and similarly sized clusters.'],
+                    attributes: { performance: 5, speed: 10, interpretability: 8, scalability: 10, robustness: 4 }
+                },
+                {
+                    id: 'gmm',
+                    name: 'Gaussian Mixture Models (GMM)',
+                    category: 'Unsupervised Learning',
+                    summary: 'A probabilistic model that assumes data points are generated from a mixture of several Gaussian distributions, allowing for more flexible cluster shapes.',
+                    applications: 'Customer segmentation, density estimation, anomaly detection, image segmentation.',
+                    strengths: ['Can model clusters of arbitrary shapes and sizes.', 'Provides probabilistic assignments of data points to clusters.', 'More flexible than K-Means, can handle overlapping clusters.', 'Can be used for density estimation and anomaly detection.'],
+                    weaknesses: ['Sensitive to initialization of parameters (means, covariances, weights).', 'Computationally more expensive than K-Means.', 'Requires choosing the number of components (K) in advance.', 'Assumes that underlying components are Gaussian, which may not always hold.', 'Can struggle with very high-dimensional data.'],
+                    attributes: { performance: 6, speed: 5, interpretability: 6, scalability: 5, robustness: 6 }
+                },
+                {
+                    id: 'vbgmm',
+                    name: 'Variational Bayesian Gaussian Mixture Models (VBGMM)',
+                    category: 'Unsupervised Learning',
+                    summary: 'A probabilistic clustering algorithm that automatically determines the number of components (clusters) using a Bayesian approach, making it robust to overfitting.',
+                    applications: 'Density estimation, robust clustering, data generation, when the number of clusters is unknown or needs to be inferred.',
+                    strengths: ['Automatically determines the number of components (clusters) from data.', 'More robust to overfitting than standard GMM due to regularization from Bayesian inference.', 'Provides probabilistic assignments of data points to clusters.', 'Can handle clusters of arbitrary shapes and sizes.'],
+                    weaknesses: ['Computationally more expensive than K-Means or standard GMM for large datasets.', 'Can still be sensitive to initialization of parameters (though less so than GMM).', 'Assumes that underlying components are Gaussian, which may not always hold.', 'Interpretability can be challenging due to the probabilistic nature and complexity.'],
+                    attributes: { performance: 7, speed: 4, interpretability: 6, scalability: 4, robustness: 7 }
+                },
+                {
+                    id: 'hierarchical-clustering',
+                    name: 'Hierarchical Clustering',
+                    category: 'Unsupervised Learning',
+                    summary: 'Builds a hierarchy of clusters either agglomeratively (bottom-up) or divisively (top-down).',
+                    applications: 'Biological taxonomy, social network analysis, market segmentation.',
+                    strengths: ['Does not require specifying the number of clusters.', 'Produces an intuitive dendrogram for visualization.', 'Relatively simple to understand.'],
+                    weaknesses: ['Computationally expensive (often O(n^3)), not suitable for large datasets.', 'Arbitrary choices of distance metric and linkage criteria.', 'Rarely provides the optimal solution.', 'Dendrograms can be misinterpreted.'],
+                    attributes: { performance: 3, speed: 2, interpretability: 7, scalability: 2, robustness: 5 }
+                },
+                {
+                    id: 'agglomerative-clustering',
+                    name: 'Agglomerative Clustering',
+                    category: 'Unsupervised Learning',
+                    summary: 'A type of hierarchical clustering that starts with individual data points as clusters and merges them iteratively.',
+                    applications: 'Gene expression analysis, document organization, customer segmentation for detailed hierarchy.',
+                    strengths: ['Does not require specifying the number of clusters in advance (can choose from dendrogram).', 'Can discover clusters of arbitrary shapes.', 'Provides a full hierarchy of clusters, offering detailed insights into data structure.', 'Flexible with various distance metrics and linkage criteria.'],
+                    weaknesses: ['Computationally expensive for large datasets (O(N^2) or O(N^3)).', 'High memory usage (stores similarity matrix).', 'Once a merge is made, it cannot be undone (greedy approach).', 'Sensitive to noise and outliers.', 'Choosing optimal linkage and distance can be challenging.'],
+                    attributes: { performance: 4, speed: 2, interpretability: 7, scalability: 2, robustness: 5 }
+                },
+                 {
+                    id: 'dbscan',
+                    name: 'DBSCAN',
+                    category: 'Unsupervised Learning',
+                    summary: 'A density-based clustering algorithm that groups together points that are closely packed.',
+                    applications: 'Anomaly detection, geographical data analysis, identifying clusters of arbitrary shapes.',
+                    strengths: ['Can find arbitrarily shaped clusters.', 'Does not require specifying the number of clusters.', 'Robust to outliers, which it identifies as noise.', 'Consistent results (not dependent on initialization).'],
+                    weaknesses: ['Sensitive to parameters (epsilon, MinPts).', 'Performance degrades in high-dimensional space ("curse of dimensionality").', 'Can struggle with clusters of varying densities.', 'Can be less efficient than K-Means on large datasets.'],
+                    attributes: { performance: 6, speed: 6, interpretability: 6, scalability: 5, robustness: 8 }
+                },
+                {
+                    id: 'mean-shift',
+                    name: 'Mean Shift',
+                    category: 'Unsupervised Learning',
+                    summary: 'A non-parametric clustering algorithm that identifies clusters by shifting data points towards the mode (densest area) of the data distribution.',
+                    applications: 'Image segmentation, object tracking, anomaly detection, real-time data analysis.',
+                    strengths: ['Does not require specifying the number of clusters in advance.', 'Can discover arbitrarily shaped clusters.', 'Robust to outliers and noise.', 'The cluster centers are actual data points (or modes of density).'],
+                    weaknesses: ['Computationally expensive, especially for high-dimensional data (O(N^2)).', 'Sensitive to the bandwidth parameter.', 'Can struggle with clusters of varying densities.', 'Does not scale well to very large datasets.', 'Results can be sensitive to the initial placement of points.'],
+                    attributes: { performance: 5, speed: 3, interpretability: 6, scalability: 3, robustness: 7 }
+                },
+                {
+                    id: 'spectral-clustering',
+                    name: 'Spectral Clustering',
+                    category: 'Unsupervised Learning',
+                    summary: 'A clustering technique that uses the eigenvalues of a similarity matrix to reduce dimensionality before clustering in a lower-dimensional space.',
+                    applications: 'Image segmentation, community detection in networks, bioinformatics, clustering non-convex data.',
+                    strengths: ['Can find non-convex clusters and complex shapes.', 'Does not assume a specific cluster shape (like spherical).', 'Often performs well when other clustering algorithms fail.', 'Can be combined with other clustering algorithms (e.g., K-Means on the embedded data).'],
+                    weaknesses: ['Computationally expensive for large datasets (involves eigenvalue decomposition).', 'Requires specifying the number of clusters (K) in advance.', 'Sensitive to the choice of similarity graph (e.g., kernel parameters).', 'High memory usage for large similarity matrices.', 'Can be difficult to interpret the results directly.'],
+                    attributes: { performance: 7, speed: 3, interpretability: 4, scalability: 3, robustness: 6 }
+                },
+                {
+                    id: 'isolation-forest',
+                    name: 'Isolation Forest',
+                    category: 'Unsupervised Learning',
+                    summary: 'An ensemble tree-based anomaly detection algorithm that isolates anomalies by building random decision trees and measuring path length.',
+                    applications: 'Fraud detection, network intrusion detection, outlier detection in various datasets.',
+                    strengths: ['Very efficient for high-dimensional data and large datasets.', 'Does not require a distance metric, unlike density-based methods.', 'Effective for detecting diverse types of anomalies.', 'Less sensitive to normal data points, focuses on isolating anomalies.', 'Low memory footprint.'],
+                    weaknesses: ['Sensitive to noisy data, which can lead to false positives.', 'Not ideal for very small datasets (may not build enough trees to isolate anomalies effectively).', 'Interpretability can be limited for individual anomaly scores.', 'Requires tuning of the contamination parameter for thresholding.', 'Can be less effective if anomalies are not sparse and distinct.'],
+                    attributes: { performance: 7, speed: 9, interpretability: 5, scalability: 9, robustness: 7 }
+                },
+                {
+                    id: 'one-class-svm',
+                    name: 'One-Class SVM',
+                    category: 'Unsupervised Learning',
+                    summary: 'An unsupervised anomaly detection algorithm that learns a boundary around normal data points, classifying anything outside as an outlier.',
+                    applications: 'Novelty detection, fraud detection, network intrusion detection, manufacturing defect detection.',
+                    strengths: ['Effective in high-dimensional spaces.', 'Can learn complex, non-linear decision boundaries for anomaly detection using kernels.', 'Robust to outliers in the training data (as it focuses on the normal class).', 'Useful when only normal data is available for training.'],
+                    weaknesses: ['Sensitive to parameter tuning (nu, gamma).', 'Computationally expensive for large datasets.', 'Scalability issues similar to standard SVMs.', 'Requires careful selection of the kernel function.', 'Can be difficult to interpret the decision boundary.'],
+                    attributes: { performance: 7, speed: 4, interpretability: 3, scalability: 3, robustness: 7 }
+                },
+                {
+                    id: 'pca',
+                    name: 'Principal Component Analysis (PCA)',
+                    category: 'Dimensionality Reduction',
+                    summary: 'An unsupervised technique to reduce dataset dimensionality while preserving maximum variance.',
+                    applications: 'Preprocessing for other ML algorithms, image compression, data visualization.',
+                    strengths: ['Reduces complexity and multicollinearity.', 'Minimizes information loss by maximizing variance.', 'Adaptive to the dataset without strong assumptions.', 'Can help in outlier detection.'],
+                    weaknesses: ['Principal components can be hard to interpret.', 'Sensitive to the scale of data and outliers.', 'Ignores class labels (unsupervised), so may not preserve separability.', 'May not perform well if variance does not correspond to signal.'],
+                    attributes: { performance: 7, speed: 8, interpretability: 4, scalability: 8, robustness: 5 }
+                },
+                {
+                    id: 'randomized-pca',
+                    name: 'Randomized PCA',
+                    category: 'Dimensionality Reduction',
+                    summary: 'An approximate PCA method that uses randomized algorithms to quickly find the first few principal components for very large datasets.',
+                    applications: 'Large-scale dimensionality reduction, image compression for big data, feature extraction for massive datasets, when speed is critical.',
+                    strengths: ['Significantly faster for large datasets and high-dimensional data than standard PCA.', 'More memory-efficient, especially for finding a few dominant components.', 'Good for finding a few dominant components for very large matrices.', 'Can be used as a preprocessing step for other ML models.'],
+                    weaknesses: ['Provides approximate results (not exact PCA).', 'Less accurate for finding many components (typically used for a small number).', 'Still sensitive to outliers (like standard PCA).', 'May not be suitable when high precision is required for all components.'],
+                    attributes: { performance: 7, speed: 9, interpretability: 4, scalability: 9, robustness: 5 }
+                },
+                {
+                    id: 'lda',
+                    name: 'Linear Discriminant Analysis (LDA)',
+                    category: 'Dimensionality Reduction',
+                    summary: 'A supervised technique to reduce dimensionality by maximizing class separability.',
+                    applications: 'Face recognition, text analysis, biomedical studies, as a classifier.',
+                    strengths: ['Maximizes class separability (supervised).', 'Simple, powerful, and computationally efficient.', 'Effective for managing high-dimensional data and multicollinearity.'],
+                    weaknesses: ['Relies on strong assumptions (Gaussian distribution, equal covariance).', 'Sensitive to outliers.', 'The number of components is limited by the number of classes.'],
+                    attributes: { performance: 7, speed: 8, interpretability: 6, scalability: 7, robustness: 5 }
+                },
+                {
+                    id: 'tsne',
+                    name: 't-Distributed Stochastic Neighbor Embedding (t-SNE)',
+                    category: 'Dimensionality Reduction',
+                    summary: 'A non-linear dimensionality reduction technique primarily used for visualizing high-dimensional data by mapping it to a lower-dimensional space (2D or 3D).',
+                    applications: 'Data visualization, exploring clusters in high-dimensional data (e.g., genomics, image features, text embeddings).',
+                    strengths: ['Excellent for visualizing clusters and local structures in high-dimensional data.', 'Can capture complex non-linear relationships.', 'Produces visually appealing and interpretable plots of data distribution.', 'Effective for revealing inherent groupings that linear methods might miss.'],
+                    weaknesses: ['Computationally expensive and slow for large datasets (O(N log N) or O(N^2)).', 'Sensitive to the "perplexity" parameter.', 'Does not preserve global distances well (only local neighborhoods).', 'Non-deterministic (results can vary between runs).', 'Not suitable for direct use as a preprocessing step for other ML models (only for visualization).'],
+                    attributes: { performance: 8, speed: 2, interpretability: 7, scalability: 2, robustness: 4 }
+                },
+                {
+                    id: 'umap',
+                    name: 'Uniform Manifold Approximation and Projection (UMAP)',
+                    category: 'Dimensionality Reduction',
+                    summary: 'A general-purpose non-linear dimensionality reduction algorithm, often used for visualization, that aims to preserve both local and global data structure.',
+                    applications: 'Data visualization (similar to t-SNE but faster), single-cell RNA-seq analysis, image analysis, text embeddings.',
+                    strengths: ['Significantly faster and more scalable than t-SNE for large datasets.', 'Preserves more of the global data structure compared to t-SNE.', 'Can be used for both visualization and as a preprocessing step for other ML models.', 'More deterministic and reproducible than t-SNE.', 'Flexible with various distance metrics.'],
+                    weaknesses: ['Can be sensitive to its hyperparameters (n_neighbors, min_dist).', 'Interpretability of the resulting embedding can still be challenging.', 'Requires careful understanding of its manifold learning assumptions.', 'May sometimes produce less visually distinct clusters than t-SNE for very specific datasets.'],
+                    attributes: { performance: 8, speed: 6, interpretability: 6, scalability: 7, robustness: 6 }
+                },
+                {
+                    id: 'isomap',
+                    name: 'Isomap',
+                    category: 'Dimensionality Reduction',
+                    summary: 'A non-linear dimensionality reduction method that computes geodesic distances in the high-dimensional space and then embeds them into a lower-dimensional Euclidean space.',
+                    applications: 'Uncovering underlying manifold structures, visualizing complex datasets, facial recognition, image processing.',
+                    strengths: ['Capable of uncovering non-linear relationships and manifold structures.', 'Preserves global data structure better than t-SNE.', 'Can be effective for visualizing data that lies on a curved manifold.', 'Provides a low-dimensional embedding that reflects intrinsic data geometry.'],
+                    weaknesses: ['Computationally intensive and slow for large datasets (requires computing all-pairs shortest paths).', 'Sensitive to the choice of neighborhood parameter (n_neighbors).', 'Can be sensitive to noise and outliers.', 'May struggle with data that does not lie on a single, continuous manifold.', 'Interpretability of the embedded dimensions can be challenging.'],
+                    attributes: { performance: 7, speed: 2, interpretability: 5, scalability: 2, robustness: 4 }
+                },
+                {
+                    id: 'lle',
+                    name: 'Locally Linear Embedding (LLE)',
+                    category: 'Dimensionality Reduction',
+                    summary: 'A non-linear dimensionality reduction technique that reconstructs data points from their neighbors in a lower-dimensional space, preserving local geometry.',
+                    applications: 'Manifold learning, visualizing high-dimensional data, facial recognition, image processing, discovering intrinsic data structure.',
+                    strengths: ['Capable of uncovering non-linear manifold structures.', 'Preserves local neighborhood relationships (local geometry).', 'Does not require specifying parameters like kernel type or distance metric (beyond number of neighbors).', 'Can be effective for data that lies on a curved manifold.'],
+                    weaknesses: ['Computationally intensive and slow for large datasets (involves solving a sparse eigenvalue problem).', 'Sensitive to the number of neighbors (n_neighbors).', 'Sensitive to noisy data and outliers.', 'Requires dense data (struggles with sparse data).', 'Can be unstable if the manifold is not well-sampled or has complex self-intersections.'],
+                    attributes: { performance: 7, speed: 2, interpretability: 5, scalability: 2, robustness: 3 }
+                },
+                {
+                    id: 'fastica',
+                    name: 'FastICA',
+                    category: 'Dimensionality Reduction',
+                    summary: 'An algorithm for Independent Component Analysis (ICA), which separates a multivariate signal into additive subcomponents that are statistically independent.',
+                    applications: 'Blind source separation (e.g., cocktail party problem), artifact removal in EEG/fMRI data, feature extraction, financial data analysis.',
+                    strengths: ['Can separate statistically independent components from mixed signals.', 'Effective for blind source separation problems.', 'Can extract meaningful latent features from complex data.', 'Computationally efficient compared to some other ICA algorithms.'],
+                    weaknesses: ['Assumes statistical independence of components (strong assumption).', 'Sensitive to the number of components to extract.', 'The order and sign of extracted components are arbitrary.', 'Can struggle with non-Gaussian components.', 'Requires careful preprocessing (centering, whitening).'],
+                    attributes: { performance: 7, speed: 6, interpretability: 6, scalability: 6, robustness: 5 }
+                },
+                {
+                    id: 'kernel-approximation',
+                    name: 'Kernel Approximation',
+                    category: 'Dimensionality Reduction',
+                    summary: 'Techniques (e.g., Random Kitchen Sinks, Nystroem method) to approximate kernel functions, allowing linear models to handle non-linear data efficiently.',
+                    applications: 'Enabling linear models to work with non-linear data at scale, speeding up kernel SVMs, large-scale non-linear feature mapping.',
+                    strengths: ['Transforms data to allow linear models to capture non-linearities.', 'Significantly faster and more scalable than explicit kernel methods for large datasets.', 'Reduces computational complexity for kernel-based algorithms.', 'Can be used as a preprocessing step for various linear models.'],
+                    weaknesses: ['Approximation introduces some error (trade-off between speed and accuracy).', 'Requires careful selection of parameters (e.g., n_components for approximation).', 'Interpretability can be reduced as features are transformed into a higher-dimensional space.', 'Performance depends on the quality of the approximation and the chosen kernel.'],
+                    attributes: { performance: 7, speed: 8, interpretability: 4, scalability: 8, robustness: 6 }
+                },
+                {
+                    id: 'label-propagation',
+                    name: 'Label Propagation',
+                    category: 'Semi-Supervised Learning',
+                    summary: 'A graph-based semi-supervised learning algorithm that propagates labels from a small set of labeled data points to unlabeled points through a similarity graph.',
+                    applications: 'Image and text classification with limited labeled data, anomaly detection (as a preprocessing step), social network analysis.',
+                    strengths: ['Effective with a small amount of labeled data.', 'Can leverage the structure of unlabeled data for better classification.', 'Conceptually simple and easy to understand.', 'Can handle non-linear decision boundaries implicitly through the graph structure.', 'Relatively fast for moderate-sized graphs.'],
+                    weaknesses: ['Sensitive to the quality and density of the graph (similarity metric).', 'Can be sensitive to noise and outliers in the labeled data.', 'Scalability issues for very large datasets (building and operating on the graph).', 'Performance highly depends on the assumption that nearby points have similar labels.', 'Requires careful tuning of graph construction parameters.'],
+                    attributes: { performance: 6, speed: 5, interpretability: 7, scalability: 4, robustness: 5 }
+                },
+                {
+                    id: 'decision-trees',
+                    name: 'Decision Trees',
+                    category: 'Tree-Based Algorithms',
+                    summary: 'A simple, flowchart-like structure where each internal node represents a "test" on an attribute.',
+                    applications: 'Initial data exploration, rule extraction, simple classification/regression tasks.',
+                    strengths: ['Highly interpretable and transparent.', 'Can handle both numerical and categorical data.', 'Robust to outliers and can handle missing values.', 'Performs automatic feature selection.'],
+                    weaknesses: ['Highly prone to overfitting.', 'Unstable; small data variations can lead to a completely different tree.', 'Can create biased trees if data is imbalanced.', 'Greedy algorithm may not find the global optimum.'],
+                    attributes: { performance: 6, speed: 7, interpretability: 10, scalability: 7, robustness: 6 }
+                },
+                {
+                    id: 'random-forests',
+                    name: 'Random Forests',
+                    category: 'Tree-Based Algorithms',
+                    summary: 'An ensemble method that fits a number of decision tree classifiers on various sub-samples of the dataset.',
+                    applications: 'Versatile for complex classification and regression (e.g., customer behavior, sales forecasting).',
+                    strengths: ['High accuracy and very robust to overfitting.', 'Effectively handles large datasets with high dimensionality.', 'Manages missing values and outliers well.', 'Provides feature importance scores.'],
+                    weaknesses: ['Computationally intensive and slower than simpler models.', 'A "black box" model, lacking the interpretability of single trees.', 'Requires hyperparameter tuning for optimal results.'],
+                    attributes: { performance: 9, speed: 6, interpretability: 5, scalability: 8, robustness: 9 }
+                },
+                {
+                    id: 'adaboost',
+                    name: 'AdaBoost',
+                    category: 'Boosting Algorithms',
+                    summary: 'An ensemble method that combines weak learners sequentially, focusing on misclassified instances.',
+                    applications: 'Face detection, spam filtering, anomaly detection.',
+                    strengths: ['High accuracy in classification.', 'Adaptively focuses on hard-to-classify instances.', 'Less prone to overfitting with weak classifiers.', 'Relatively easy to implement.'],
+                    weaknesses: ['Highly sensitive to noisy data and outliers.', 'Training is sequential and can be time-consuming.', 'Performance depends heavily on the quality of weak learners.'],
+                    attributes: { performance: 8, speed: 5, interpretability: 4, scalability: 5, robustness: 6 }
+                },
+                {
+                    id: 'gbm',
+                    name: 'Gradient Boosting Machines (GBM)',
+                    category: 'Boosting Algorithms',
+                    summary: 'An ensemble method that builds models sequentially, with each new model correcting the errors of the previous one.',
+                    applications: 'Spam detection, predicting housing prices, sentiment analysis.',
+                    strengths: ['High predictive performance and accuracy.', 'Adaptable to various loss functions.', 'Inherently performs feature selection.', 'Reduces both bias and variance effectively.'],
+                    weaknesses: ['Requires careful and extensive hyperparameter tuning.', 'Sequential training is difficult to parallelize, limiting scalability.', 'Computationally demanding and can be slow.', 'Prone to overfitting without proper regularization.'],
+                    attributes: { performance: 8, speed: 5, interpretability: 4, scalability: 6, robustness: 7 }
+                },
+                {
+                    id: 'xgboost',
+                    name: 'XGBoost',
+                    category: 'Boosting Algorithms',
+                    summary: 'An optimized and scalable implementation of gradient boosting, known for its performance.',
+                    applications: 'Kaggle competitions, credit scoring, disease prediction, any high-stakes predictive modeling.',
+                    strengths: ['State-of-the-art performance and accuracy.', 'Highly scalable with parallel and distributed computing.', 'Efficiently handles missing values and outliers.', 'Built-in regularization to prevent overfitting.', 'Provides feature importance.'],
+                    weaknesses: ['Complex hyperparameter tuning.', 'Can be memory-intensive and computationally expensive.', 'Can still overfit on small datasets if not configured well.', 'Less native support for categorical features than CatBoost.'],
+                    attributes: { performance: 10, speed: 8, interpretability: 4, scalability: 9, robustness: 9 }
+                },
+                {
+                    id: 'lightgbm',
+                    name: 'LightGBM',
+                    category: 'Boosting Algorithms',
+                    summary: 'A fast, high-performance gradient boosting framework based on decision tree algorithms.',
+                    applications: 'Large-scale problems like sales forecasting, fraud detection, and predictive maintenance.',
+                    strengths: ['Extremely fast and memory efficient.', 'High accuracy due to leaf-wise growth.', 'Excellent scalability with GPU support.', 'Native support for categorical features.'],
+                    weaknesses: ['Prone to overfitting on small datasets due to leaf-wise growth.', 'Requires careful parameter tuning to avoid overfitting.', 'Can be harder to interpret.'],
+                    attributes: { performance: 10, speed: 10, interpretability: 4, scalability: 10, robustness: 8 }
+                },
+                {
+                    id: 'catboost',
+                    name: 'CatBoost',
+                    category: 'Boosting Algorithms',
+                    summary: 'A gradient boosting library excelling with datasets rich in categorical features.',
+                    applications: 'Customer churn prediction, fraud detection, recommendation systems.',
+                    strengths: ['Superior native handling of categorical features (Ordered Target Statistics).', 'Robust to overfitting, especially on small or noisy datasets.', 'Strong out-of-the-box performance with less tuning.', 'Optimized for low-latency inference.', 'Handles missing data and imbalanced data well.'],
+                    weaknesses: ['Can be more memory-intensive than XGBoost.', 'Smaller community compared to XGBoost.', 'Interface can be complex for beginners.'],
+                    attributes: { performance: 10, speed: 9, interpretability: 5, scalability: 9, robustness: 10 }
+                },
+                {
+                    id: 'q-learning',
+                    name: 'Q-Learning',
+                    category: 'Reinforcement Learning',
+                    summary: 'A model-free, off-policy reinforcement learning algorithm that learns an optimal action-value function (Q-function) for an agent in an environment.',
+                    applications: 'Game playing (e.g., Atari games), robotics control, resource management, autonomous navigation.',
+                    strengths: ['Model-free: does not require knowledge of the environment dynamics.', 'Off-policy: can learn from actions not taken by the current policy, allowing for exploration.', 'Guaranteed to converge to an optimal policy under certain conditions (finite MDP, sufficient exploration).', 'Relatively simple to understand and implement for discrete state/action spaces.'],
+                    weaknesses: ['Suffers from the "curse of dimensionality" for large or continuous state/action spaces (Q-table becomes too large).', 'Requires extensive exploration to find optimal Q-values, which can be time-consuming.', 'Can be slow to converge in complex environments.', 'Does not directly handle continuous actions (requires discretization).'],
+                    attributes: { performance: 7, speed: 4, interpretability: 6, scalability: 2, robustness: 6 }
+                },
+                {
+                    id: 'sarsa',
+                    name: 'SARSA',
+                    category: 'Reinforcement Learning',
+                    summary: 'A model-free, on-policy reinforcement learning algorithm that learns an optimal action-value function based on the current action, reward, next state, and next action.',
+                    applications: 'Robotics, game playing, control systems where safety or adherence to current policy is critical.',
+                    strengths: ['On-policy: learns the value of the policy currently being followed, which can lead to safer exploration (less likely to take risky actions).', 'Relatively simple to understand and implement for discrete state/action spaces.', 'Guaranteed to converge to an optimal policy under certain conditions (finite MDP, sufficient exploration).'],
+                    weaknesses: ['Suffers from the "curse of dimensionality" for large or continuous state/action spaces.', 'On-policy nature means it can be slower to explore the full state-action space compared to off-policy methods like Q-Learning.', 'Can get stuck in local optima if exploration is insufficient.', 'Does not directly handle continuous actions (requires discretization).'],
+                    attributes: { performance: 6, speed: 4, interpretability: 6, scalability: 2, robustness: 6 }
+                }
+            ],
+            ranking: [
+                { name: ['XGBoost', 'LightGBM', 'CatBoost'], score: 12, rationale: 'Tier 1: Consistently deliver state-of-the-art accuracy on tabular data. Widely used for high-stakes predictive modeling.' },
+                { name: 'Random Forests', score: 11, rationale: 'Tier 2: Highly robust and reliable ensemble. Offers high accuracy and effectively mitigates overfitting.' },
+                { name: ['Support Vector Classifier (SVC)', 'Support Vector Regressor (SVR)'], score: 10, rationale: 'Tier 3: Strong for complex, high-dimensional data. The kernel trick allows modeling non-linear relationships for both classification and regression.' },
+                { name: 'Multi-layer Perceptron (MLP)', score: 9.5, rationale: 'Tier 4: Capable of learning complex non-linear relationships for both classification and regression, but requires careful tuning.' },
+                { name: 'Gradient Boosting Machines (GBM)', score: 9, rationale: 'Tier 5: Foundational boosting with high accuracy, but less optimized than modern counterparts.' },
+                { name: 'Decision Trees', score: 8, rationale: 'Tier 6: Highly interpretable but very prone to overfitting and instability in isolation.' },
+                { name: 'Isolation Forest', score: 7.5, rationale: 'Tier 7: Highly efficient and effective for anomaly detection, especially in high-dimensional data.' },
+                { name: 'One-Class SVM', score: 7.2, rationale: 'Tier 8: Effective for novelty detection and outlier identification, especially in high-dimensional spaces.' },
+                { name: 'Variational Bayesian Gaussian Mixture Models (VBGMM)', score: 7, rationale: 'Tier 9: Probabilistic clustering that automatically determines clusters and is robust to overfitting.' },
+                { name: 'Logistic Regression', score: 6.8, rationale: 'Tier 10: Excellent for interpretable binary classification and provides probabilistic outputs.' },
+                { name: 'Elastic Net Regression', score: 6.5, rationale: 'Tier 11: Balances feature selection and multicollinearity handling, offering a robust linear model.' },
+                { name: 'Ridge Regression', score: 6.2, rationale: 'Tier 12: An improved version of Linear Regression, robust to multicollinearity and overfitting through regularization.' },
+                { name: 'Lasso Regression', score: 5.9, rationale: 'Tier 13: Useful for feature selection and regularization, especially when many features are irrelevant.' },
+                { name: ['SGD Classifier', 'SGD Regressor'], score: 5.7, rationale: 'Tier 14: Very efficient and scalable for large, sparse datasets and online learning, but sensitive to tuning.' },
+                { name: 'Naive Bayes', score: 5.5, rationale: 'Tier 15: Extremely fast and simple, but relies on a strong, often unrealistic, independence assumption.' },
+                { name: 'Gaussian Mixture Models (GMM)', score: 5.2, rationale: 'Tier 16: More flexible clustering than K-Means, capable of modeling arbitrary shapes probabilistically.' },
+                { name: 'Mean Shift', score: 5, rationale: 'Tier 17: Does not require specifying number of clusters and finds arbitrary shapes, but computationally intensive.' },
+                { name: 'K-Means Clustering', score: 4.5, rationale: 'Tier 18: Simplest clustering model, efficient for spherical clusters, but sensitive to K and initialization.' },
+                { name: 'Mini-Batch K-Means', score: 4.3, rationale: 'Tier 19: Faster and more scalable K-Means variant for large datasets, with slight trade-off in stability.' },
+                { name: 'K-Nearest Neighbors (KNN)', score: 4, rationale: 'Tier 20: Simple but faces significant scalability challenges and suffers from the "curse of dimensionality".' },
+                { name: 'Quadratic Discriminant Analysis (QDA)', score: 3.8, rationale: 'Tier 21: Can model non-linear boundaries by assuming class-specific covariances, but requires more data.' },
+                { name: 'DBSCAN', score: 3, rationale: 'Tier 22: Niche algorithm, excellent for arbitrary cluster shapes and noise but sensitive to parameters.' },
+                { name: 'Agglomerative Clustering', score: 2.8, rationale: 'Tier 23: Provides a full cluster hierarchy and finds arbitrary shapes, but computationally expensive for large datasets.' },
+                { name: 'Hierarchical Clustering', score: 2, rationale: 'Tier 24: Good for visual exploration but computationally expensive and rarely optimal.' },
+                { name: 'Spectral Clustering', score: 1.8, rationale: 'Tier 25: Effective for non-convex clusters, but computationally demanding and sensitive to parameters.' },
+                { name: 'Linear Discriminant Analysis (LDA)', score: 1, rationale: 'Tier 26: Effective for supervised dimensionality reduction but relies on very specific and strict assumptions.' },
+                { name: ['t-SNE', 'UMAP', 'Isomap', 'LLE', 'FastICA', 'Kernel Approximation', 'Randomized PCA'], score: 0.5, rationale: 'Tier 27 (Visualization/Feature Extraction-focused): Primarily for non-linear dimensionality reduction for visualization or independent component extraction, not general predictive modeling. UMAP/t-SNE for visualization; Isomap/LLE for manifold learning; FastICA for source separation; Kernel Approximation/Randomized PCA for efficient transformation.' },
+                { name: 'Label Propagation', score: 0.3, rationale: 'Tier 28 (Semi-Supervised): Leverages both labeled and unlabeled data, effective with limited labeled samples, but sensitive to graph quality.' },
+                { name: ['Q-Learning', 'SARSA'], score: 0, rationale: 'Reinforcement Learning: These algorithms are designed for sequential decision-making in dynamic environments and are not directly comparable in performance to supervised/unsupervised algorithms for static prediction tasks. Their "performance" is measured by cumulative reward in an environment.' }
+            ]
+        };
+
+        let currentFilter = 'all';
+        let currentSearchQuery = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const views = {
+                explorer: document.getElementById('explorer-view'),
+                comparison: document.getElementById('comparison-view'),
+                ranking: document.getElementById('ranking-view'),
+                reference: document.getElementById('reference-view'),
+                libraries: document.getElementById('libraries-view')
+            };
+
+            const navButtons = document.querySelectorAll('.nav-item');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const algorithmGrid = document.getElementById('algorithm-grid');
+            const modal = document.getElementById('algorithm-modal');
+            const modalBody = document.getElementById('modal-body');
+            const closeModalBtn = document.querySelector('.close-button');
+            const searchInput = document.getElementById('search-input');
+
+            const algo1Select = document.getElementById('algo1-select');
+            const algo2Select = document.getElementById('algo2-select');
+            const algo1Details = document.getElementById('algo1-details');
+            const algo2Details = document.getElementById('algo2-details');
+            
+            let comparisonChartInstance = null;
+            let rankingChartInstance = null;
+
+            function switchView(viewName) {
+                navButtons.forEach(btn => {
+                    btn.classList.toggle('nav-active', btn.dataset.view === viewName);
+                });
+                Object.values(views).forEach(view => view.classList.add('hidden'));
+                views[viewName].classList.remove('hidden');
+                
+                if (viewName === 'ranking' && !rankingChartInstance) {
+                    initRankingChart();
+                } else if (viewName === 'comparison' && !comparisonChartInstance) {
+                    updateComparison();
+                }
+            }
+
+            function renderAlgorithmCards() {
+                algorithmGrid.innerHTML = '';
+                let filteredAlgos = appData.algorithms;
+
+                if (currentFilter !== 'all') {
+                    filteredAlgos = filteredAlgos.filter(algo => algo.category === currentFilter);
+                }
+
+                if (currentSearchQuery) {
+                    const query = currentSearchQuery.toLowerCase();
+                    filteredAlgos = filteredAlgos.filter(algo => 
+                        algo.name.toLowerCase().includes(query) ||
+                        algo.summary.toLowerCase().includes(query) ||
+                        algo.applications.toLowerCase().includes(query)
+                    );
+                }
+
+                if (filteredAlgos.length === 0) {
+                    algorithmGrid.innerHTML = '<p class="text-center text-gray-500 col-span-full">No algorithms found matching your criteria.</p>';
+                } else {
+                    filteredAlgos.forEach(algo => {
+                        const card = document.createElement('div');
+                        card.className = 'card bg-white p-6 rounded-lg shadow-md cursor-pointer';
+                        card.dataset.id = algo.id;
+                        card.innerHTML = `
+                            <h3 class="text-xl font-bold mb-2 text-[#3D405B]">${algo.name}</h3>
+                            <p class="text-sm text-gray-500 mb-4">${algo.category}</p>
+                            <p class="text-gray-700">${algo.summary}</p>
+                        `;
+                        card.addEventListener('click', () => showModal(algo.id));
+                        algorithmGrid.appendChild(card);
+                    });
+                }
+            }
+
+            function showModal(algoId) {
+                const algo = appData.algorithms.find(a => a.id === algoId);
+                if (!algo) return;
+
+                const listToHtml = (title, items, color) => `
+                    <h4 class="text-lg font-semibold mt-4 mb-2 text-[${color}]">${title}</h4>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                        ${items.map(item => `<li>${item}</li>`).join('')}
+                    </ul>
+                `;
+
+                modalBody.innerHTML = `
+                    <h2 class="text-3xl font-bold mb-2 text-[#3D405B]">${algo.name}</h2>
+                    <p class="text-md text-gray-500 mb-4">${algo.category}</p>
+                    <p class="mb-4 text-gray-800"><b>Primary Applications:</b> ${algo.applications}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>${listToHtml('Strengths', algo.strengths, '#81B29A')}</div>
+                        <div>${listToHtml('Weaknesses', algo.weaknesses, '#E07A5F')}</div>
+                    </div>
+                `;
+                modal.style.display = 'block';
+            }
+            
+            function populateSelects() {
+                algo1Select.innerHTML = '';
+                algo2Select.innerHTML = '';
+
+                appData.algorithms.forEach(algo => {
+                    const option1 = document.createElement('option');
+                    option1.value = algo.id;
+                    option1.textContent = algo.name;
+                    algo1Select.appendChild(option1);
+
+                    const option2 = document.createElement('option');
+                    option2.value = algo.id;
+                    option2.textContent = algo.name;
+                    algo2Select.appendChild(option2);
+                });
+                if (appData.algorithms.some(a => a.id === 'random-forests')) {
+                    algo1Select.value = 'random-forests';
+                } else {
+                    algo1Select.value = appData.algorithms[0]?.id || '';
+                }
+                if (appData.algorithms.some(a => a.id === 'xgboost')) {
+                    algo2Select.value = 'xgboost';
+                } else {
+                    algo2Select.value = appData.algorithms[1]?.id || '';
+                }
+                updateComparison();
+            }
+
+            function updateComparison() {
+                const algo1 = appData.algorithms.find(a => a.id === algo1Select.value);
+                const algo2 = appData.algorithms.find(a => a.id === algo2Select.value);
+
+                if (!algo1 || !algo2) {
+                    algo1Details.innerHTML = '<p class="text-center text-gray-500">Select an algorithm.</p>';
+                    algo2Details.innerHTML = '<p class="text-center text-gray-500">Select an algorithm.</p>';
+                    if (comparisonChartInstance) {
+                        comparisonChartInstance.destroy();
+                        comparisonChartInstance = null;
+                    }
+                    return;
+                }
+
+                const renderDetails = (algo) => `
+                    <h3 class="text-2xl font-bold mb-2 text-[#3D405B]">${algo.name}</h3>
+                    <p class="text-sm text-gray-500 mb-4">${algo.category}</p>
+                    <h4 class="text-lg font-semibold mt-4 mb-2 text-[#81B29A]">Strengths</h4>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">${algo.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+                    <h4 class="text-lg font-semibold mt-4 mb-2 text-[#E07A5F]">Weaknesses</h4>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">${algo.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
+                `;
+                
+                algo1Details.innerHTML = renderDetails(algo1);
+                algo2Details.innerHTML = renderDetails(algo2);
+
+                updateComparisonChart(algo1, algo2);
+            }
+            
+            function updateComparisonChart(algo1, algo2) {
+                const ctx = document.getElementById('comparison-chart').getContext('2d');
+                const labels = ['Performance', 'Speed', 'Interpretability', 'Scalability', 'Robustness'];
+                const data1 = labels.map(label => algo1.attributes[label.toLowerCase()] || 0);
+                const data2 = labels.map(label => algo2.attributes[label.toLowerCase()] || 0);
+
+                if (comparisonChartInstance) {
+                    comparisonChartInstance.destroy();
+                }
+
+                comparisonChartInstance = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: algo1.name,
+                                data: data1,
+                                backgroundColor: 'rgba(129, 178, 154, 0.2)',
+                                borderColor: 'rgb(129, 178, 154)',
+                                pointBackgroundColor: 'rgb(129, 178, 154)',
+                            },
+                            {
+                                label: algo2.name,
+                                data: data2,
+                                backgroundColor: 'rgba(224, 122, 95, 0.2)',
+                                borderColor: 'rgb(224, 122, 95)',
+                                pointBackgroundColor: 'rgb(224, 122, 95)',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 10,
+                                grid: { color: 'rgba(0,0,0,0.1)' },
+                                angleLines: { color: 'rgba(0,0,0,0.1)' },
+                                pointLabels: { font: { size: 14 } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                enabled: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            function initRankingChart() {
+                const ctx = document.getElementById('ranking-chart').getContext('2d');
+                const sortedRanking = [...appData.ranking].sort((a, b) => {
+                    if (a.score === b.score) {
+                        const nameA = Array.isArray(a.name) ? a.name.join(' ') : a.name;
+                        const nameB = Array.isArray(b.name) ? b.name.join(' ') : b.name;
+                        return nameA.localeCompare(nameB);
+                    }
+                    return a.score - b.score;
+                });
+                
+                // Simplify labels for the chart axis
+                const labels = sortedRanking.map(item => {
+                    if (Array.isArray(item.name)) {
+                        return item.name[0] + ' et al.'; // Show first name + "et al."
+                    }
+                    return item.name;
+                });
+
+                const data = sortedRanking.map(item => item.score);
+                const backgroundColors = sortedRanking.map(item => {
+                    if (item.category === 'Reinforcement Learning' || item.category === 'Semi-Supervised Learning') return '#A9A9A9';
+                    if (item.score > 9) return '#81B29A';
+                    if (item.score > 6) return '#F2C14E';
+                    if (item.score > 3) return '#E07A5F';
+                    return '#BDB76B';
+                });
+
+                 rankingChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Ranking Score (Higher is Better)',
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            borderColor: backgroundColors.map(c => c.replace('0.8', '1')),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: { display: false }
+                            },
+                             y: {
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        const item = tooltipItems[0];
+                                        const rankItem = sortedRanking[item.dataIndex];
+                                        if (Array.isArray(rankItem.name)) {
+                                            return rankItem.name.join(', '); // Show all names in tooltip title
+                                        } else {
+                                            return rankItem.name;
+                                        }
+                                    },
+                                    label: function(context) {
+                                        const rankItem = sortedRanking[context.dataIndex];
+                                        return `${rankItem.rationale}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => switchView(button.dataset.view));
+            });
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('filter-active'));
+                    button.classList.add('filter-active');
+                    currentFilter = button.dataset.filter;
+                    renderAlgorithmCards();
+                });
+            });
+
+            searchInput.addEventListener('input', () => {
+                currentSearchQuery = searchInput.value;
+                renderAlgorithmCards();
+            });
+
+            closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+            window.addEventListener('click', (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            algo1Select.addEventListener('change', updateComparison);
+            algo2Select.addEventListener('change', updateComparison);
+
+            // Initial setup
+            renderAlgorithmCards();
+            populateSelects();
+        });
+
+    </script>
+</body>
+</html>
