@@ -25,6 +25,16 @@
         }
         .nav-item {
             transition: all 0.3s ease;
+            /* Ensure buttons are touch-friendly */
+            min-width: 80px; /* Minimum width for small buttons */
+            padding: 0.75rem 1rem; /* Adjust padding for touch */
+            font-size: 0.875rem; /* Smaller font for small screens */
+        }
+        @media (min-width: 768px) {
+            .nav-item {
+                padding: 0.75rem 1.5rem; /* Larger padding for desktop */
+                font-size: 1rem; /* Standard font size for desktop */
+            }
         }
         .card:hover {
             transform: translateY(-5px);
@@ -34,18 +44,30 @@
             background-color: #E07A5F;
             color: #FFFFFF;
         }
+        .filter-btn {
+            /* Ensure filter buttons are touch-friendly */
+            min-width: 60px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        @media (min-width: 768px) {
+            .filter-btn {
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+            }
+        }
         .chart-container {
             position: relative;
             width: 100%;
-            max-width: 800px;
+            max-width: 800px; /* Max width for larger screens */
             margin-left: auto;
             margin-right: auto;
-            height: 400px;
-            max-height: 50vh;
+            height: 400px; /* Default height */
+            max-height: 50vh; /* Max height relative to viewport */
         }
         @media (min-width: 768px) {
             .chart-container {
-                height: 500px;
+                height: 500px; /* Taller on desktop */
             }
         }
         .modal {
@@ -63,22 +85,21 @@
         .modal-content {
             background-color: #F8F7F4;
             margin: 5% auto;
-            padding: 2rem;
+            padding: 1.5rem; /* Adjusted padding for mobile */
             border: 1px solid #888;
-            width: 90%;
+            width: 95%; /* Wider on mobile */
             max-width: 800px;
             border-radius: 0.5rem;
             animation: slideIn 0.3s ease-in-out;
-            max-height: 80vh;
+            max-height: 90vh; /* More vertical space on mobile */
             overflow-y: auto;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideIn {
-            from { transform: translateY(-50px); }
-            to { transform: translateY(0); }
+        @media (min-width: 768px) {
+            .modal-content {
+                padding: 2rem; /* Standard padding for desktop */
+                width: 90%;
+                max-height: 80vh;
+            }
         }
         .close-button {
             color: #aaa;
@@ -100,6 +121,34 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #6a947e;
         }
+
+        /* Responsive adjustments for main layout */
+        .container {
+            padding: 1rem; /* Smaller padding on mobile */
+        }
+        @media (min-width: 768px) {
+            .container {
+                padding: 2rem; /* Standard padding on desktop */
+            }
+        }
+
+        /* Responsive adjustments for comparison view selects */
+        #comparison-view .flex-col {
+            flex-direction: column;
+        }
+        @media (min-width: 768px) {
+            #comparison-view .md\:flex-row {
+                flex-direction: row;
+            }
+        }
+        #algo1-select, #algo2-select {
+            width: 100%; /* Full width on mobile */
+        }
+        @media (min-width: 768px) {
+            #algo1-select, #algo2-select {
+                width: 33.333333%; /* One-third width on desktop */
+            }
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -107,38 +156,38 @@
     <div id="app" class="container mx-auto p-4 md:p-8">
         
         <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-[#3D405B] mb-2">Machine Learning Algorithm's by Husnain</h1>
-            <p class="text-lg text-gray-600">An interactive guide to traditional machine learning algorithms based on the comprehensive analysis report.</p>
+            <h1 class="text-3xl md:text-5xl font-bold text-[#3D405B] mb-2">Machine Learning Algorithm's by Husnain</h1>
+            <p class="text-base md:text-lg text-gray-600">An interactive guide to traditional machine learning algorithms based on the comprehensive analysis report.</p>
         </header>
 
-        <nav class="flex justify-center mb-8 bg-white p-2 rounded-full shadow-md">
-            <button data-view="explorer" class="nav-item nav-active px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold">Search</button>
-            <button data-view="comparison" class="nav-item px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold">Head-to-Head Comparison</button>
-            <button data-view="ranking" class="nav-item px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold">Performance Ranking</button>
-            <button data-view="reference" class="nav-item px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold">Scikit-learn Reference</button>
-            <button data-view="libraries" class="nav-item px-4 py-2 md:px-6 md:py-3 rounded-full font-semibold">ML Libraries</button>
+        <nav class="flex flex-wrap justify-center gap-2 mb-8 bg-white p-2 rounded-full shadow-md">
+            <button data-view="explorer" class="nav-item nav-active px-3 py-2 md:px-6 md:py-3 rounded-full font-semibold">Search</button>
+            <button data-view="comparison" class="nav-item px-3 py-2 md:px-6 md:py-3 rounded-full font-semibold">Head-to-Head Comparison</button>
+            <button data-view="ranking" class="nav-item px-3 py-2 md:px-6 md:py-3 rounded-full font-semibold">Performance Ranking</button>
+            <button data-view="reference" class="nav-item px-3 py-2 md:px-6 md:py-3 rounded-full font-semibold">Scikit-learn Reference</button>
+            <button data-view="libraries" class="nav-item px-3 py-2 md:px-6 md:py-3 rounded-full font-semibold">ML Libraries</button>
         </nav>
 
         <main>
             <!-- Algorithm Explorer View -->
             <div id="explorer-view">
                 <div class="text-center mb-8">
-                    <p class="max-w-3xl mx-auto text-gray-700">This section provides a detailed breakdown of each machine learning algorithm. Use the filters to narrow down by category. You can also search for a specific algorithm by name or summary. Click on any algorithm card to view its detailed analysis, including its primary applications, strengths, and weaknesses.</p>
+                    <p class="max-w-3xl mx-auto text-sm md:text-base text-gray-700">This section provides a detailed breakdown of each machine learning algorithm. Use the filters to narrow down by category. You can also search for a specific algorithm by name or summary. Click on any algorithm card to view its detailed analysis, including its primary applications, strengths, and weaknesses.</p>
                 </div>
                 <div class="mb-6">
-                    <input type="text" id="search-input" placeholder="Search algorithms..." class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-[#81B29A] focus:border-transparent">
+                    <input type="text" id="search-input" placeholder="Search algorithms..." class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-[#81B29A] focus:border-transparent text-sm md:text-base">
                 </div>
                 <div id="filters" class="flex flex-wrap justify-center gap-2 mb-8">
-                    <button data-filter="all" class="filter-btn filter-active px-4 py-2 bg-white rounded-full shadow-sm font-medium">All</button>
-                    <button data-filter="Supervised Learning" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Supervised</button>
-                    <button data-filter="Unsupervised Learning" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Unsupervised</button>
-                    <button data-filter="Dimensionality Reduction" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Dimensionality Reduction</button>
-                    <button data-filter="Semi-Supervised Learning" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Semi-Supervised</button>
-                    <button data-filter="Tree-Based Algorithms" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Tree-Based</button>
-                    <button data-filter="Boosting Algorithms" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Boosting</button>
-                    <button data-filter="Reinforcement Learning" class="filter-btn px-4 py-2 bg-white rounded-full shadow-sm font-medium">Reinforcement Learning</button>
+                    <button data-filter="all" class="filter-btn filter-active px-3 py-2 bg-white rounded-full shadow-sm font-medium">All</button>
+                    <button data-filter="Supervised Learning" class="filter-btn px-3 py-2 bg-white rounded-full shadow-sm font-medium">Supervised</button>
+                    <button data-filter="Unsupervised Learning" class="filter-btn px-3 py-2 bg-white rounded-full shadow-sm font-medium">Unsupervised</button>
+                    <button data-filter="Dimensionality Reduction" class="filter-btn px-3 py-2 bg-white rounded-full shadow-sm font-medium">Dimensionality Reduction</button>
+                    <button data-filter="Semi-Supervised Learning" class="filter-btn px-3 py-2 bg-white rounded-full shadow-sm font-medium">Semi-Supervised</button>
+                    <button data-filter="Tree-Based Algorithms" class="filter-btn px-3 py-2 bg-white rounded-full shadow-sm font-medium">Tree-Based</button>
+                    <button data-filter="Boosting Algorithms" class="filter-btn px-3 py-2 bg-white rounded-full shadow-sm font-medium">Boosting</button>
+                    <button data-filter="Reinforcement Learning" class="filter-btn px-3 py-2 bg-white rounded-full shadow-sm font-medium">Reinforcement Learning</button>
                 </div>
-                <div id="algorithm-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="algorithm-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <!-- Algorithm cards will be injected here -->
                 </div>
             </div>
@@ -146,20 +195,20 @@
             <!-- Comparison View -->
             <div id="comparison-view" class="hidden">
                  <div class="text-center mb-8">
-                    <p class="max-w-3xl mx-auto text-gray-700">Directly compare two algorithms to understand their relative advantages. Select an algorithm from each dropdown to see a side-by-side analysis of their strengths and weaknesses, along with a radar chart visualizing their key characteristics like performance, speed, and interpretability.</p>
+                    <p class="max-w-3xl mx-auto text-sm md:text-base text-gray-700">Directly compare two algorithms to understand their relative advantages. Select an algorithm from each dropdown to see a side-by-side analysis of their strengths and weaknesses, along with a radar chart visualizing their key characteristics like performance, speed, and interpretability.</p>
                 </div>
                 <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
-                    <select id="algo1-select" class="p-3 border rounded-lg shadow-sm bg-white w-full md:w-1/3"></select>
-                    <span class="font-bold text-2xl text-[#E07A5F]">vs</span>
-                    <select id="algo2-select" class="p-3 border rounded-lg shadow-sm bg-white w-full md:w-1/3"></select>
+                    <select id="algo1-select" class="p-3 border rounded-lg shadow-sm bg-white w-full md:w-1/3 text-sm md:text-base"></select>
+                    <span class="font-bold text-xl md:text-2xl text-[#E07A5F]">vs</span>
+                    <select id="algo2-select" class="p-3 border rounded-lg shadow-sm bg-white w-full md:w-1/3 text-sm md:text-base"></select>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div id="algo1-details" class="bg-white p-6 rounded-lg shadow-lg"></div>
-                    <div id="algo2-details" class="bg-white p-6 rounded-lg shadow-lg"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                    <div id="algo1-details" class="bg-white p-4 md:p-6 rounded-lg shadow-lg text-sm md:text-base"></div>
+                    <div id="algo2-details" class="bg-white p-4 md:p-6 rounded-lg shadow-lg text-sm md:text-base"></div>
                 </div>
-                <div class="mt-8 bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="text-2xl font-bold text-center mb-4 text-[#3D405B]">Attribute Comparison</h3>
-                    <div class="chart-container h-96 md:h-[500px]">
+                <div class="mt-8 bg-white p-4 md:p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl md:text-2xl font-bold text-center mb-4 text-[#3D405B]">Attribute Comparison</h3>
+                    <div class="chart-container h-72 md:h-[500px]">
                         <canvas id="comparison-chart"></canvas>
                     </div>
                 </div>
@@ -168,12 +217,12 @@
             <!-- Ranking View -->
             <div id="ranking-view" class="hidden">
                  <div class="text-center mb-8">
-                    <p class="max-w-3xl mx-auto text-gray-700">This section visualizes the final rankings from the report, which are based on a synthesis of general performance, versatility, and real-world applicability. The ranking provides a high-level guide to help practitioners choose the most suitable algorithm for their specific needs, with top-tier algorithms offering the best balance of accuracy and robustness for structured data problems.</p>
-                    <p class="max-w-3xl mx-auto text-gray-700 mt-4">Note: Reinforcement Learning algorithms are ranked separately due to their distinct problem domain (sequential decision-making) compared to traditional supervised/unsupervised tasks.</p>
+                    <p class="max-w-3xl mx-auto text-sm md:text-base text-gray-700">This section visualizes the final rankings from the report, which are based on a synthesis of general performance, versatility, and real-world applicability. The ranking provides a high-level guide to help practitioners choose the most suitable algorithm for their specific needs, with top-tier algorithms offering the best balance of accuracy and robustness for structured data problems.</p>
+                    <p class="max-w-3xl mx-auto text-sm md:text-base text-gray-700 mt-4">Note: Reinforcement Learning algorithms are ranked separately due to their distinct problem domain (sequential decision-making) compared to traditional supervised/unsupervised tasks.</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="text-2xl font-bold text-center mb-4 text-[#3D405B]">Algorithm Performance & Application Ranking</h3>
-                    <div class="chart-container h-[800px] md:h-[1000px]">
+                <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl md:text-2xl font-bold text-center mb-4 text-[#3D405B]">Algorithm Performance & Application Ranking</h3>
+                    <div class="chart-container h-[700px] md:h-[1000px]">
                         <canvas id="ranking-chart"></canvas>
                     </div>
                 </div>
@@ -182,21 +231,21 @@
             <!-- Scikit-learn Reference View -->
             <div id="reference-view" class="hidden">
                 <div class="text-center mb-8">
-                    <p class="max-w-3xl mx-auto text-gray-700">This section provides a direct link to the official scikit-learn algorithm cheat sheet, which can help guide algorithm selection based on your problem type and data characteristics.</p>
+                    <p class="max-w-3xl mx-auto text-sm md:text-base text-gray-700">This section provides a direct link to the official scikit-learn algorithm cheat sheet, which can help guide algorithm selection based on your problem type and data characteristics.</p>
                 </div>
                 <div class="flex justify-center items-center p-4 bg-white rounded-lg shadow-lg">
-                    <a href="https://scikit-learn.org/1.3/tutorial/machine_learning_map/" target="_blank" class="text-[#81B29A] hover:underline text-lg font-semibold">Go to Scikit-learn Algorithm Map</a>
+                    <a href="https://scikit-learn.org/1.3/tutorial/machine_learning_map/" target="_blank" class="text-[#81B29A] hover:underline text-base md:text-lg font-semibold">Go to Scikit-learn Algorithm Map</a>
                 </div>
             </div>
 
             <!-- ML Libraries View -->
             <div id="libraries-view" class="hidden">
                 <div class="text-center mb-8">
-                    <p class="max-w-3xl mx-auto text-gray-700">Explore essential machine learning libraries, each offering robust tools for various tasks. Click on a link to visit their official documentation.</p>
+                    <p class="max-w-3xl mx-auto text-sm md:text-base text-gray-700">Explore essential machine learning libraries, each offering robust tools for various tasks. Click on a link to visit their official documentation.</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="text-2xl font-bold text-center mb-4 text-[#3D405B]">Popular ML Libraries</h3>
-                    <ul class="list-disc list-inside space-y-3 text-gray-700 max-w-2xl mx-auto">
+                <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl md:text-2xl font-bold text-center mb-4 text-[#3D405B]">Popular ML Libraries</h3>
+                    <ul class="list-disc list-inside space-y-3 text-sm md:text-base text-gray-700 max-w-2xl mx-auto">
                         <li>
                             <a href="https://scikit-learn.org/stable/documentation.html" target="_blank" class="text-[#81B29A] hover:underline font-medium">Scikit-learn</a>: Comprehensive library for traditional machine learning algorithms (classification, regression, clustering, dimensionality reduction, model selection, preprocessing).
                         </li>
@@ -758,12 +807,12 @@
                 } else {
                     filteredAlgos.forEach(algo => {
                         const card = document.createElement('div');
-                        card.className = 'card bg-white p-6 rounded-lg shadow-md cursor-pointer';
+                        card.className = 'card bg-white p-4 md:p-6 rounded-lg shadow-md cursor-pointer';
                         card.dataset.id = algo.id;
                         card.innerHTML = `
-                            <h3 class="text-xl font-bold mb-2 text-[#3D405B]">${algo.name}</h3>
-                            <p class="text-sm text-gray-500 mb-4">${algo.category}</p>
-                            <p class="text-gray-700">${algo.summary}</p>
+                            <h3 class="text-lg md:text-xl font-bold mb-2 text-[#3D405B]">${algo.name}</h3>
+                            <p class="text-xs md:text-sm text-gray-500 mb-4">${algo.category}</p>
+                            <p class="text-sm md:text-base text-gray-700">${algo.summary}</p>
                         `;
                         card.addEventListener('click', () => showModal(algo.id));
                         algorithmGrid.appendChild(card);
@@ -776,17 +825,17 @@
                 if (!algo) return;
 
                 const listToHtml = (title, items, color) => `
-                    <h4 class="text-lg font-semibold mt-4 mb-2 text-[${color}]">${title}</h4>
-                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                    <h4 class="text-base md:text-lg font-semibold mt-4 mb-2 text-[${color}]">${title}</h4>
+                    <ul class="list-disc list-inside space-y-1 text-sm md:text-base text-gray-700">
                         ${items.map(item => `<li>${item}</li>`).join('')}
                     </ul>
                 `;
 
                 modalBody.innerHTML = `
-                    <h2 class="text-3xl font-bold mb-2 text-[#3D405B]">${algo.name}</h2>
-                    <p class="text-md text-gray-500 mb-4">${algo.category}</p>
-                    <p class="mb-4 text-gray-800"><b>Primary Applications:</b> ${algo.applications}</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2 text-[#3D405B]">${algo.name}</h2>
+                    <p class="text-sm md:text-md text-gray-500 mb-4">${algo.category}</p>
+                    <p class="mb-4 text-sm md:text-base text-gray-800"><b>Primary Applications:</b> ${algo.applications}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div>${listToHtml('Strengths', algo.strengths, '#81B29A')}</div>
                         <div>${listToHtml('Weaknesses', algo.weaknesses, '#E07A5F')}</div>
                     </div>
@@ -837,12 +886,12 @@
                 }
 
                 const renderDetails = (algo) => `
-                    <h3 class="text-2xl font-bold mb-2 text-[#3D405B]">${algo.name}</h3>
-                    <p class="text-sm text-gray-500 mb-4">${algo.category}</p>
-                    <h4 class="text-lg font-semibold mt-4 mb-2 text-[#81B29A]">Strengths</h4>
-                    <ul class="list-disc list-inside space-y-1 text-gray-700">${algo.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
-                    <h4 class="text-lg font-semibold mt-4 mb-2 text-[#E07A5F]">Weaknesses</h4>
-                    <ul class="list-disc list-inside space-y-1 text-gray-700">${algo.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
+                    <h3 class="text-xl md:text-2xl font-bold mb-2 text-[#3D405B]">${algo.name}</h3>
+                    <p class="text-sm md:text-base text-gray-500 mb-4">${algo.category}</p>
+                    <h4 class="text-base md:text-lg font-semibold mt-4 mb-2 text-[#81B29A]">Strengths</h4>
+                    <ul class="list-disc list-inside space-y-1 text-sm md:text-base text-gray-700">${algo.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+                    <h4 class="text-base md:text-lg font-semibold mt-4 mb-2 text-[#E07A5F]">Weaknesses</h4>
+                    <ul class="list-disc list-inside space-y-1 text-sm md:text-base text-gray-700">${algo.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
                 `;
                 
                 algo1Details.innerHTML = renderDetails(algo1);
@@ -891,15 +940,23 @@
                                 max: 10,
                                 grid: { color: 'rgba(0,0,0,0.1)' },
                                 angleLines: { color: 'rgba(0,0,0,0.1)' },
-                                pointLabels: { font: { size: 14 } }
+                                pointLabels: { font: { size: 12 /* Smaller for mobile */ } }
                             }
                         },
                         plugins: {
                             legend: {
                                 position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 12 /* Smaller for mobile */
+                                    }
+                                }
                             },
                             tooltip: {
-                                enabled: true
+                                enabled: true,
+                                bodyFont: {
+                                    size: 12 /* Smaller for mobile */
+                                }
                             }
                         }
                     }
@@ -920,7 +977,12 @@
                 // Simplify labels for the chart axis
                 const labels = sortedRanking.map(item => {
                     if (Array.isArray(item.name)) {
-                        return item.name[0] + ' et al.'; // Show first name + "et al."
+                        // Display the first name and "et al." for brevity on the axis
+                        return item.name[0].split(' ').slice(0, 2).join(' ') + ' et al.'; 
+                    }
+                    // For single names, try to keep it concise, maybe truncate if very long
+                    if (item.name.length > 25) { // Arbitrary length, adjust as needed
+                        return item.name.substring(0, 22) + '...';
                     }
                     return item.name;
                 });
@@ -956,7 +1018,12 @@
                                 grid: { display: false }
                             },
                              y: {
-                                grid: { color: 'rgba(0,0,0,0.05)' }
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: {
+                                    font: {
+                                        size: 10 /* Smaller font for mobile axis labels */
+                                    }
+                                }
                             }
                         },
                         plugins: {
@@ -968,16 +1035,24 @@
                                     title: function(tooltipItems) {
                                         const item = tooltipItems[0];
                                         const rankItem = sortedRanking[item.dataIndex];
+                                        // Show all names in the tooltip title
                                         if (Array.isArray(rankItem.name)) {
-                                            return rankItem.name.join(', '); // Show all names in tooltip title
+                                            return rankItem.name.join(', '); 
                                         } else {
                                             return rankItem.name;
                                         }
                                     },
                                     label: function(context) {
                                         const rankItem = sortedRanking[context.dataIndex];
+                                        // Show the full rationale in the tooltip label
                                         return `${rankItem.rationale}`;
                                     }
+                                },
+                                bodyFont: {
+                                    size: 12 /* Smaller for mobile */
+                                },
+                                titleFont: {
+                                    size: 14 /* Smaller for mobile */
                                 }
                             }
                         }
